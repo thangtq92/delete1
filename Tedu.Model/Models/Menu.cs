@@ -7,6 +7,7 @@ namespace Tedu.Model.Models
     public class Menu
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
 
         [Required]
@@ -21,7 +22,7 @@ namespace Tedu.Model.Models
         public int GroupID { get; set; }
 
         [ForeignKey("GroupID")]
-        public virtual MenuGroup MenuGroup { set; get; }
+        public virtual MenuGroup MenuGroup { get; set; }
 
         public string Target { get; set; }
 
