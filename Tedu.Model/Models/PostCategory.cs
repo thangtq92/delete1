@@ -1,29 +1,35 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Tedu.Model.Abstract;
 
 namespace Tedu.Model.Models
 {
-    public class ProductCategory : Auditable
+    [Table("PostCategories")]
+    public class PostCategory
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int ID { set; get; }
+        public int ID { get; set; }
+
         [Required]
-        public string Name { set; get; }
+        [MaxLength(256)]
+        public string Name { get; set; }
+
+        [Column(TypeName = "varchar")]
         [Required]
         [MaxLength(256)]
         public string Alias { get; set; }
+
         [MaxLength(500)]
         public string Description { get; set; }
+
         public int? ParentID { get; set; }
         public int? DisplayOrder { get; set; }
 
-        public int Image { get; set; }
+        [MaxLength(256)]
+        public string Image { get; set; }
 
         public bool? HomeFlag { get; set; }
-
-        public virtual IEnumerable<Product> Products { set; get; }
+        public virtual IEnumerable<Post> Posts { get; set; }
     }
 }
