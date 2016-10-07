@@ -8,7 +8,8 @@ namespace Tedu.Model.Models
     {
         [Key]
         [MaxLength(50)]
-        public int TagID { get; set; }
+        [Column(TypeName ="varchar")]
+        public string TagID { get; set; }
 
         [Required]
         [MaxLength(50)]
