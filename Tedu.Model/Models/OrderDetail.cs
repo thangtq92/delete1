@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Tedu.Model.Models
 {
-    public class OrderDetails
+    public class OrderDetail
     {
         [Key]
         public int OrderID { get; set; }
