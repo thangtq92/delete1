@@ -3,7 +3,7 @@ using Tedu.Model.Models;
 
 namespace Tedu.Data.Repositories
 {
-    public interface IOrderDetailRepository
+    public interface IOrderDetailRepository : IRepository<OrderDetail>
     {
     }
 

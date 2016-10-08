@@ -3,7 +3,7 @@ using Tedu.Model.Models;
 
 namespace Tedu.Data.Repositories
 {
-    public interface IProductTagRepository
+    public interface IProductTagRepository : IRepository<ProductTag>
     {
     }
 

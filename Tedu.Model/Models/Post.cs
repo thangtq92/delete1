@@ -28,9 +28,12 @@ namespace Tedu.Model.Models
         public string Content { get; set; }
         public bool? HomeFlag { get; set; }
         public bool? HotFlag { get; set; }
+        public bool Status { get; set; }
         public int? ViewCount { get; set; }
 
         [ForeignKey("CategoryID")]
         public virtual PostCategory PostCategory { get; set; }
+        
+        public virtual IEnumberable<PostTag> PostTags { get; set; }
     }
 }

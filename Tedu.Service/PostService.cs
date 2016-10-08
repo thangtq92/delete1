@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Tedu.Data.Infrastructure;
 using Tedu.Data.Repositories;
 using Tedu.Model.Models;
+using System.Linq;
 
 namespace Tedu.Service
 {
@@ -16,11 +17,11 @@ namespace Tedu.Service
 
         IEnumerable<Post> GetAll();
 
-        IEnumerable<Post> GetAllPaging(int page, int pagesize, int totalrow);
+        IEnumerable<Post> GetAllPaging(int page, int pagesize, out int totalrow);
 
         Post GetById(int id);
 
-        IEnumerable<Post> GetAllByTagPaging(int page, int pagesize, int totalrow);
+        IEnumerable<Post> GetAllByTagPaging(string tag, int page, int pagesize, out int totalrow);
 
         void SaveChange();
     }
@@ -38,42 +39,43 @@ namespace Tedu.Service
 
         public void Add(Post post)
         {
-            throw new NotImplementedException();
+            _postRepository.Add(post);
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            _postRepository.Delete(id);
         }
 
         public IEnumerable<Post> GetAll()
         {
-            throw new NotImplementedException();
+            return _postRepository.GetAll(new string[] { "PostCategory"});
         }
 
-        public IEnumerable<Post> GetAllByTagPaging(int page, int pagesize, int totalrow)
+        public IEnumerable<Post> GetAllByTagPaging(string tag, int page, int pagesize, out int totalrow)
         {
-            throw new NotImplementedException();
+            //TODO: Select all post by tag
+            return _postRepository.GetMultiPaging(x=>x.Status, out totalrow,page, pagesize);
         }
 
-        public IEnumerable<Post> GetAllPaging(int page, int pagesize, int totalrow)
+        public IEnumerable<Post> GetAllPaging(int page, int pagesize, out int totalrow)
         {
-            throw new NotImplementedException();
+            return _postRepository.GetMultiPaging(x => x.Status, out totalrow, page, pagesize);
         }
 
         public Post GetById(int id)
         {
-            throw new NotImplementedException();
+            return _postRepository.GetSingleById(id);
         }
 
         public void SaveChange()
         {
-            throw new NotImplementedException();
+            _unitOfWork.Commit();
         }
 
         public void Update(Post post)
         {
-            throw new NotImplementedException();
+            _postRepository.Update(post);
         }
     }
 }

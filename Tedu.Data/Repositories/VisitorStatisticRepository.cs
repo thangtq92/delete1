@@ -3,11 +3,11 @@ using Tedu.Model.Models;
 
 namespace Tedu.Data.Repositories
 {
-    public interface IVisitorStatisticRepository
+    public interface IVisitorStatisticRepository : IRepository<VisitorStatistic>
     {
     }
 
-    public class VisitorStatisticRepository : RepositoryBase<Tag>, IVisitorStatisticRepository
+    public class VisitorStatisticRepository : RepositoryBase<VisitorStatistic>, IVisitorStatisticRepository
     {
         public VisitorStatisticRepository(IDbFactory dbFactory) : base(dbFactory)
         {
