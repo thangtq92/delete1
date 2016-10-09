@@ -8,35 +8,28 @@ namespace Tedu.Data.Infrastructure
 {
     public abstract class RepositoryBase<T> : IRepository<T> where T : class
     {
-        #region Properties
-
-        private TeduShopDbContext dataContext;
-        private readonly IDbSet<T> dbSet;
-
-        protected IDbFactory DbFactory
-        {
-            get;
-            private set;
-        }
-
-        protected TeduShopDbContext DbContext
-        {
-            get { return dataContext ?? (dataContext = DbFactory.Init()); }
-        }
-
-        #endregion Properties
-
         protected RepositoryBase(IDbFactory dbFactory)
         {
             DbFactory = dbFactory;
             dbSet = DbContext.Set<T>();
         }
 
+        #region Properties
+
+        private TeduShopDbContext dataContext;
+        private readonly IDbSet<T> dbSet;
+
+        private IDbFactory DbFactory { get; }
+
+        protected TeduShopDbContext DbContext => dataContext ?? (dataContext = DbFactory.Init());
+
+        #endregion Properties
+
         #region Implementation
 
-        public virtual void Add(T entity)
+        public virtual T Add(T entity)
         {
-            dbSet.Add(entity);
+            return dbSet.Add(entity);
         }
 
         public virtual void Update(T entity)
@@ -45,20 +38,21 @@ namespace Tedu.Data.Infrastructure
             dataContext.Entry(entity).State = EntityState.Modified;
         }
 
-        public virtual void Delete(T entity)
+        public virtual T Delete(T entity)
         {
-            dbSet.Remove(entity);
+            return dbSet.Remove(entity);
         }
-        public virtual void Delete(int id)
+
+        public virtual T Delete(int id)
         {
             var entity = dbSet.Find(id);
-            dbSet.Remove(entity);
+            return dbSet.Remove(entity);
         }
 
         public virtual void DeleteMulti(Expression<Func<T, bool>> where)
         {
-            IEnumerable<T> objects = dbSet.Where<T>(where).AsEnumerable();
-            foreach (T obj in objects)
+            var objects = dbSet.Where(where).AsEnumerable();
+            foreach (var obj in objects)
                 dbSet.Remove(obj);
         }
 
@@ -77,7 +71,7 @@ namespace Tedu.Data.Infrastructure
             return dbSet.Count(where);
         }
 
-        public IQueryable<T> GetAll(string[] includes = null)
+        public IEnumerable<T> GetAll(string[] includes = null)
         {
             //HANDLE INCLUDES FOR ASSOCIATED OBJECTS IF APPLICABLE
             if (includes != null && includes.Count() > 0)
@@ -93,10 +87,17 @@ namespace Tedu.Data.Infrastructure
 
         public T GetSingleByCondition(Expression<Func<T, bool>> expression, string[] includes = null)
         {
-            return GetAll(includes).FirstOrDefault(expression);
+            if (includes != null && includes.Count() > 0)
+            {
+                var query = dataContext.Set<T>().Include(includes.First());
+                foreach (var include in includes.Skip(1))
+                    query = query.Include(include);
+                return query.FirstOrDefault(expression);
+            }
+            return dataContext.Set<T>().FirstOrDefault(expression);
         }
 
-        public virtual IQueryable<T> GetMulti(Expression<Func<T, bool>> predicate, string[] includes = null)
+        public virtual IEnumerable<T> GetMulti(Expression<Func<T, bool>> predicate, string[] includes = null)
         {
             //HANDLE INCLUDES FOR ASSOCIATED OBJECTS IF APPLICABLE
             if (includes != null && includes.Count() > 0)
@@ -104,15 +105,16 @@ namespace Tedu.Data.Infrastructure
                 var query = dataContext.Set<T>().Include(includes.First());
                 foreach (var include in includes.Skip(1))
                     query = query.Include(include);
-                return query.Where<T>(predicate).AsQueryable<T>();
+                return query.Where(predicate).AsQueryable();
             }
 
             return dataContext.Set<T>().Where<T>(predicate).AsQueryable<T>();
         }
 
-        public virtual IQueryable<T> GetMultiPaging(Expression<Func<T, bool>> predicate, out int total, int index = 0, int size = 20, string[] includes = null)
+        public virtual IEnumerable<T> GetMultiPaging(Expression<Func<T, bool>> predicate, out int total, int index = 0,
+            int size = 20, string[] includes = null)
         {
-            int skipCount = index * size;
+            var skipCount = index * size;
             IQueryable<T> _resetSet;
 
             //HANDLE INCLUDES FOR ASSOCIATED OBJECTS IF APPLICABLE
@@ -121,11 +123,13 @@ namespace Tedu.Data.Infrastructure
                 var query = dataContext.Set<T>().Include(includes.First());
                 foreach (var include in includes.Skip(1))
                     query = query.Include(include);
-                _resetSet = predicate != null ? query.Where<T>(predicate).AsQueryable() : query.AsQueryable();
+                _resetSet = predicate != null ? query.Where(predicate).AsQueryable() : query.AsQueryable();
             }
             else
             {
-                _resetSet = predicate != null ? dataContext.Set<T>().Where<T>(predicate).AsQueryable() : dataContext.Set<T>().AsQueryable();
+                _resetSet = predicate != null
+                    ? dataContext.Set<T>().Where<T>(predicate).AsQueryable()
+                    : dataContext.Set<T>().AsQueryable();
             }
 
             _resetSet = skipCount == 0 ? _resetSet.Take(size) : _resetSet.Skip(skipCount).Take(size);
