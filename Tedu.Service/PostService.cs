@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Tedu.Data.Infrastructure;
-using Tedu.Data.Repositories;
 using Tedu.Model.Models;
-using System.Linq;
+using TeduShop.Data.Repositories;
 
 namespace Tedu.Service
 {
@@ -18,6 +17,7 @@ namespace Tedu.Service
         IEnumerable<Post> GetAll();
 
         IEnumerable<Post> GetAllPaging(int page, int pagesize, out int totalrow);
+        IEnumerable<Post> GetAllByCategoryPaging(int categoryId, int page, int pagesize, out int totalrow);
 
         Post GetById(int id);
 
@@ -28,8 +28,8 @@ namespace Tedu.Service
 
     public class PostService : IPostService
     {
-        IPostRepository _postRepository;
-        IUnitOfWork _unitOfWork;
+        private IPostRepository _postRepository;
+        private IUnitOfWork _unitOfWork;
 
         public PostService(IPostRepository postRepository, IUnitOfWork unitOfWork)
         {
@@ -47,20 +47,30 @@ namespace Tedu.Service
             _postRepository.Delete(id);
         }
 
+        public void Update(Post post)
+        {
+            _postRepository.Update(post);
+        }
+
         public IEnumerable<Post> GetAll()
         {
-            return _postRepository.GetAll(new string[] { "PostCategory"});
+            return _postRepository.GetAll(new string[] { "PostCategory" });
         }
 
         public IEnumerable<Post> GetAllByTagPaging(string tag, int page, int pagesize, out int totalrow)
         {
             //TODO: Select all post by tag
-            return _postRepository.GetMultiPaging(x=>x.Status, out totalrow,page, pagesize);
+            return _postRepository.GetAllByTag(tag, page, pagesize, out totalrow);
         }
 
         public IEnumerable<Post> GetAllPaging(int page, int pagesize, out int totalrow)
         {
             return _postRepository.GetMultiPaging(x => x.Status, out totalrow, page, pagesize);
+        }
+
+        public IEnumerable<Post> GetAllByCategoryPaging(int categoryId, int page, int pagesize, out int totalrow)
+        {
+            return _postRepository.GetMultiPaging(x => x.Status && x.CategoryID == categoryId, out totalrow, page, pagesize, new string[] { "PostCategory" });
         }
 
         public Post GetById(int id)
@@ -73,9 +83,5 @@ namespace Tedu.Service
             _unitOfWork.Commit();
         }
 
-        public void Update(Post post)
-        {
-            _postRepository.Update(post);
-        }
     }
 }

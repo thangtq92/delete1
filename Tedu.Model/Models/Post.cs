@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Tedu.Model.Abstract;
 
 namespace Tedu.Model.Models
 {
     [Table("Posts")]
-    public class Post
+    public class Post: Auditable
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -28,12 +30,11 @@ namespace Tedu.Model.Models
         public string Content { get; set; }
         public bool? HomeFlag { get; set; }
         public bool? HotFlag { get; set; }
-        public bool Status { get; set; }
         public int? ViewCount { get; set; }
 
         [ForeignKey("CategoryID")]
         public virtual PostCategory PostCategory { get; set; }
         
-        public virtual IEnumberable<PostTag> PostTags { get; set; }
+        public virtual IEnumerable<PostTag> PostTags { get; set; }
     }
 }
